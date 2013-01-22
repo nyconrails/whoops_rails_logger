@@ -9,20 +9,20 @@ module WhoopsRailsLogger
     configure
     create_exception_strategy
   end
-  
+
   def self.configure
     config_path = File.join(Rails.root, "config", "whoops_logger.yml")
-    
+
     unless File.exists?(config_path)
       raise "Please create config/whoops_logger.yml"
     end
-    
+
     config = YAML.load_file(config_path)[Rails.env]
     WhoopsLogger.config.set(config)
     WhoopsLogger.config.logger = Rails.logger
   end
-  
+
   def self.create_exception_strategy
     strategy = WhoopsRailsLogger::ExceptionStrategy.new(:rails_exception)
-  end  
+  end
 end

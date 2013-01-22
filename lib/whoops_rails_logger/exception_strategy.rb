@@ -46,6 +46,10 @@ module WhoopsRailsLogger
         identifier << message.details[:backtrace].collect{|b| b.gsub(/:in.*/, "")}.join("\n")
         message.event_group_identifier = Digest::MD5.hexdigest(identifier)
       end
+
+      self.add_ignore_criteria(:ignore_dev_environment) do |message|
+        message.environment == "development"
+      end
     end
   end
 end
