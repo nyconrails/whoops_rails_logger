@@ -3,13 +3,13 @@ module WhoopsRailsLogger
     attr_accessor :service, :environment
     def initialize(strategy_name)
       super
-      
+
       self.service     = ::Rails.application.class.name.split("::").first.downcase + ".web"
       self.environment = ::Rails.env
-      
+
       add_message_builders
     end
-    
+
     def add_message_builders
       self.add_message_builder(:basic_details) do |message, raw_data|
         message.service     = self.service
@@ -18,17 +18,17 @@ module WhoopsRailsLogger
         message.message     = raw_data[:exception].message
         message.event_time  = Time.now
       end
-      
+
       self.add_message_builder(:details) do |message, raw_data|
         exception = raw_data[:exception]
         rack_env  = raw_data[:rack_env]
-        
+
         details = {}
         details[:backtrace] = exception.backtrace.collect{ |line|
           line.sub(/^#{ENV['GEM_HOME']}/, '$GEM_HOME').sub(/^#{Rails.root}/, '$Rails.root')
         }
 
-        details[:http_host]      = rack_env["HTTP_HOST"]        
+        details[:http_host]      = rack_env["HTTP_HOST"]
         details[:params]         = rack_env["action_dispatch.request.parameters"]
         details[:controller]     = details[:params][:controller] if details[:params]
         details[:action]         = details[:params][:action]     if details[:params]
@@ -43,7 +43,7 @@ module WhoopsRailsLogger
 
       self.add_message_builder(:create_event_group_identifier) do |message, raw_data|
         identifier = "#{message.details[:controller]}##{message.details[:action]}"
-        identifier << message.details["backtrace"].collect{|b| b.gsub(/:in.*/, "")}.join("\n")
+        identifier << message.details[:backtrace].collect{|b| b.gsub(/:in.*/, "")}.join("\n")
         message.event_group_identifier = Digest::MD5.hexdigest(identifier)
       end
     end
